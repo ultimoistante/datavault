@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DataVault Control</title>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="./vendor/chota.min.css">
+    <link rel="stylesheet" href="./vendor/notyf.min.css">
+    <style>
+        :root {
+            --color-primary: #3e99fa;
+            /* --color-secondary: #ffc107; */
+            --color-success: #50ad66;
+            --color-error: #f5643f;
+            --color-warning: #face49;
+        }
+
+        .bg-warning {
+            background-color: var(--color-warning);
+        }
+
+        .is-rounded-corner {
+            border-radius: 4px;
+        }
+
+        .is-button-padding {
+            padding: 1rem 2.5rem;
+            border: 1px solid transparent;
+        }
+
+        .is-valign-middle {
+            vertical-align: middle;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" class="container">
+        <br>
+        <h1>DataVault Control</h1>
+        <hr>
+        <br>
+        <div class="row">
+            <div class="col-2">
+                <b class="is-valign-middle">Current date/time:</b>
+            </div>
+            <div class="col">
+                <span class="tag text-center is-full-width text-white is-rounded-corner is-button-padding"
+                    v-bind:class="(gotDateTime) ? 'bg-primary' : 'bg-grey'"><b>{{currentDateTime}}</b></span>
+            </div>
+        </div>
+        <!--  -->
+        <div class="row">
+            <div class="col-2">
+                <b class="is-valign-middle">SBC Unit status:</b>
+            </div>
+            <div class="col-4">
+                <span class="tag text-center is-full-width text-white is-rounded-corner is-button-padding"
+                    v-bind:class="(gotSbcStatus) ? ((sbcPowered) ? 'bg-success' : 'bg-error') : 'bg-grey'">
+                    {{sbcPowerStatusString}}
+                </span>
+            </div>
+            <div class="col">
+                <button type="button" class="text-white is-full-width"
+                    v-bind:class="(gotSbcStatus) ? (sbcPowered ? 'bg-error' : 'bg-success') : 'bg-grey'"
+                    :disabled="gotSbcStatus == false" @click="onSBCTogglePowerBtnClick">{{sbcPowerButtonText}}</button>
+            </div>
+        </div>
+        <!--  -->
+        <div class="row">
+            <div class="col-2">
+                <b class="is-valign-middle">Activation alarm time:</b>
+            </div>
+            <div class="col-4">
+                <div class="grouped">
+                    <input type="number" v-model="activationTime.hour" min=0 max=23 id="poweron_time_hour"
+                        :disabled="!gotActivationTime">
+                    <p class="is-valign-middle">:&nbsp;</p>
+                    <input type="number" v-model="activationTime.minute" min=0 max=59 id="poweron_time_minute"
+                        :disabled="!gotActivationTime">
+                    <span class="is-valign-middle">:&nbsp;</span>
+                    <input type="number" v-model="activationTime.second" min=0 max=59 id="poweron_time_second"
+                        :disabled="!gotActivationTime">
+                    <label class="grouped" for="checkbox1" style="padding-top: 8px;">
+                        <input id="checkbox1" name="checkbox" type="checkbox" v-model="activationTime.enabled"
+                            :disabled="!gotActivationTime">
+                        enabled
+                    </label>
+
+                </div>
+            </div>
+            <div class="col">
+                <button type="button" class="button text-dark is-full-width"
+                    v-bind:class="(gotSbcStatus && gotDateTime) ? 'bg-warning' : 'bg-grey'"
+                    :disabled="!(gotSbcStatus && gotDateTime && activationTimeChanged)"
+                    @click="onSaveActivationTimeBtnClick">Save</button>
+            </div>
+        </div>
+    </div>
+    <!--  -->
+    <script type="text/javascript" src="./vendor/vue.min.js"></script>
+    <script type="text/javascript" src="./vendor/reconnectingWs.min.js"></script>
+    <script type="text/javascript" src="./vendor/notyf.min.js"></script>
+    <script type="text/javascript" src="./js/app.js"></script>
+</body>
+
+</html>
