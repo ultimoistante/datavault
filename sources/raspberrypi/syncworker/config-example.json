@@ -1,0 +1,50 @@
+{
+    "settings": {
+        "system": {
+            "shutdown_grace_time_secs": 5,
+            "poweroff_grace_time_secs": 60
+        },
+        "serial": {
+            "port": "/dev/ttyAMA0",
+            "baudrate": 9600,
+            "bytesize": "EIGHTBITS",
+            "parity": "PARITY_NONE",
+            "stopbits": "STOPBITS_ONE"
+        },
+        "logging": {
+            "path": "./logs",
+            "tasks_subdir_format": "%Y%m%d-%H%M",
+            "filename": "syncworker.log",
+            "max_bytes": 1048576,
+            "files_count": 8
+        },
+        "tasks": {
+            "run_as_user": "datavault",
+            "local_root_path": "/mnt/storage/datavault/data/"
+        }
+    },
+    "tasks": [
+        {
+            "command": "sync",
+            "flags": "--log-level DEBUG",
+            "remote": {
+                "id": "your_rclone_remote_id_here",
+                "path": "/"
+            },
+            "local_path": "local/path/where/store/files/",
+            "logfile": "name_of_logfile_for_this_task.log",
+            "enabled": true
+        },
+        {
+            "command": "sync",
+            "flags": "--log-level DEBUG",
+            "remote": {
+                "id": "another_rclone_remote_id_here",
+                "path": "/"
+            },
+            "local_path": "local/path/where/store/files/",
+            "logfile": "name_of_logfile_for_this_task.log",
+            "enabled": true
+        }
+    ]
+}

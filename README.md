@@ -28,5 +28,37 @@ This simple webpage is built with:
  - **reconnectingWs** for websocket communication
 
 ## the RaspberryPi unit
+Since I'm using an old B+ model, I've installed **DietPi** (https://dietpi.com/)
+
+I've formatted the SATA SSD drive with only one ext4 partition, and mounted under **/mnt/storage**, adding a line in **/etc/fstab**:
+    
+    UUID=[your UUID here] /mnt/storage ext4 noatime,lazytime,rw,nofail,noauto,x-systemd.automount
+
+You can find the sources for python application **(syncworker)** under sources/raspberrypi/syncworker (in this repository). You need to correctly configure **config.json** file with your tasks (there is a file named config-example.json, to be renamed to config.json).
+
+To create RClone remotes, refer to RClone documentation (https://rclone.org/remote_setup/). In the README file under syncworker folder there is an example to configure GDrive remotes.
+
+On the DietPi system, I've placed syncworker application folder under /mnt/storage/datavault (the root of SSD partition).
+
+### autostart application at boot (on DietPi)
+Since DietPi doesn't have a rc.local file (it uses systemd), you need to put a bash script under **/var/lib/dietpi/postboot.d/**
+
+    nano /var/lib/dietpi/postboot.d/datavault.sh
+
+with this content:
+
+    #!/bin/bash
+
+    systemctl restart systemd-timesyncd
+
+    sleep 2
+
+    cd /mnt/storage/datavault/syncworker
+    ./run.sh
+
+then set permissions:
+
+    chmod 755 /var/lib/dietpi/postboot.d/datavault.sh
+
 
 
