@@ -4,3 +4,5 @@ sources/esp8266/.vscode
 sources/raspberrypi/.vscode
 sources/raspberrypi/__pycache__
 sources/raspberrypi/*.pyc
+
+_stuff_
