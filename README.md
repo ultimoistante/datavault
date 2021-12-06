@@ -1,12 +1,16 @@
 # DataVault - a simple, cheap, and effective backup unit for cloud storage services
 
 ## preface
-Nowadays, we all, more or less, store our data on some *cloud storage service*. Some people (like me), in addition to using [...]
+The reason I've built this device is rather simple: I have a private NextCloud instance running on a my small server where I (and my family) store some important data. Since it is not wise to keep "all eggs in one bucket", and since that "two copies are better than one", I made this device to automatically keep a synchronized copy of all my data (from my NextCloud server and from some GDrive accounts) to its SSD drive.
 
 ## the device
 The device is rather simple: just an old Raspberry Pi model B+, a SATA SSD drive, an USB/SATA adapter, and an ESP8266 MCU board (NodeMCU).
+Everything fits perfectly in the case of an old ADSL modem (Alice Gate Plus, by Pirelli/Telecom Italia).
 
 ![](docs/photos/inner_components.png "inner components")
+![](docs/photos/1638801944301.jpg "outer 1")
+![](docs/photos/1638801944285.jpg "outer 2")
+![](docs/photos/1638801944269.jpg "outer 3")
 
 ## working principle
 Everything is powered by an external 12V DC adapter. In the box there is a DC stepdown regulator for +5V line. These two voltage levels are connected on the "power circuit" board.
@@ -36,7 +40,7 @@ I've formatted the SATA SSD drive with only one ext4 partition, and mounted unde
 
 You can find the sources for python application **(syncworker)** under sources/raspberrypi/syncworker (in this repository). You need to correctly configure **config.json** file with your tasks (there is a file named config-example.json, to be renamed to config.json).
 
-To create RClone remotes, refer to RClone documentation (https://rclone.org/remote_setup/). In the README file under syncworker folder there is an example to configure GDrive remotes.
+To create RClone remotes, refer to RClone documentation (https://rclone.org/remote_setup/). In the README file under syncworker folder there is an example to configure GDrive remotes (basically you need to connect to the RaspberryPi system via SSH, and issue some shell commands).
 
 On the DietPi system, I've placed syncworker application folder under /mnt/storage/datavault (the root of SSD partition).
 
@@ -61,4 +65,6 @@ then set permissions:
     chmod 755 /var/lib/dietpi/postboot.d/datavault.sh
 
 
+## electrical connections
+![](docs/schematics/datavault_schematics_bb.jpg "electrical connections")
 

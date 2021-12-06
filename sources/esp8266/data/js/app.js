@@ -116,8 +116,6 @@ var app = new Vue({
                                     this.sbcPowered = payload.data.sbcPowered;
                                     this.sbcPowerStatusString = payload.data.sbcPowered ? 'ON' : 'OFF';
                                     this.sbcPowerButtonText = 'Turn ' + (payload.data.sbcPowered ? 'OFF' : 'ON');
-                                    // this.$set(this, 'sbcPowered', payload.data.sbcPowered);
-                                    // this.$set(this, 'sbcPowerStatusString', payload.data.sbcPowered ? 'on' : 'off');
                                 }
                                 // updates time
                                 if ('time' in payload.data) {
@@ -171,7 +169,7 @@ var app = new Vue({
         }
         //
         // this.ws.onDisconnect = () => {
-        //     console.log('websocket disconnect');
+        //     console.log('websocket disconnected');
         // }
         //
         this.interval = setInterval(this.requestStatus, 1000);

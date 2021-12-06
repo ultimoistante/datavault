@@ -41,9 +41,6 @@
  *       .started writing
 */
 
-// TODO: fix mDNS: https://tttapa.github.io/ESP8266/Chap08%20-%20mDNS.html
-// TODO: add wifi reconnection 
-
 // ----------------------------------------------------------------------------
 // Hardware connections:
 //
@@ -55,19 +52,15 @@
 //    |            D4 [02]| - (LED_BUILTIN)
 //    |                3v3| -
 //    |                GND| -
-//    |            D5 [14]| - Power button
+//    |            D5 [14]| - Power button (for rPi)
 //    |            D6 [12]| - WPS request button
 //    |            D7 [13]| - Power Manager (this device) status LED
-//    |            D8 [15]| - MOSFET module on/off
+//    |            D8 [15]| - Power relay control
 //    |       D9 / RX [03]| - 
 //    |      D10 / TX [01]| - to RaspberryPi serial RX
 //    |                GND| -
 //    |                3v3| -
 //    +-------------------+
-//
-//    +----+----+----+----+-----+
-//    | D1 | D2 | RX | TX | GND |
-//    +-__-+----+----+----+--__-+
 //
 // ----------------------------------------------------------------------------
 
@@ -244,7 +237,7 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t /*buttonSta
                         }
                     break;
 
-                    // LongPressed goes in and out of edit mode.
+                    // LongPressed event
                 case AceButton::kEventLongPressed:
                     if (rpiPowered)
                         {
@@ -272,13 +265,6 @@ void handleButtonEvent(AceButton* button, uint8_t eventType, uint8_t /*buttonSta
 
 void serialReceiveMessageHandler(char** tokens, int tokenCount)
     {
-    // unsigned char config_changed = 0;
-    // String msg = "";
-    //
-    // prints the extracted parameters
-    // Serial.printf("[serialReceiveMessageHandler] Token count: %d\n", tokenCount);
-    // for (int i = 0; i < tokenCount; i++)
-    //     Serial.printf("   tokens[%d]: '%s'\n", i, tokens[i]);
     //
     if (tokenCount)
         {
@@ -288,15 +274,12 @@ void serialReceiveMessageHandler(char** tokens, int tokenCount)
             {
             sprintf(serialResponseBuffer, "powerBy=%s", (rpiPoweredBy == SBC_POWERED_BY_TIMER) ? "timer" : ((rpiPoweredBy == SBC_POWERED_BY_USER) ? "user" : "none"));
             serialHandler.sendMessage(serialResponseBuffer);
-            // swSerial.println(serialResponseBuffer);
             }
         //
         // bootComplete! event
         else if (strcmp(tokens[0], "bootComplete!") == 0)
             {
             statusLedHandler.setRaspberryPiStatus(StatusLedHandler::RPI_STATUS_BOOTED);
-            // sprintf(serialResponseBuffer, "{powerBy=%s}", (rpiPoweredBy == SBC_POWERED_BY_TIMER) ? "timer" : ((rpiPoweredBy == SBC_POWERED_BY_USER) ? "user" : "none"));
-            // swSerial.println(serialResponseBuffer);
             }
         //
         // powerOff request
@@ -389,10 +372,10 @@ void onActivationTimerAlarm()
         {
         Serial.println("[I] activated SBC power");
         setMosfetStatus(true);
+        // sets rpiPoweredBy variable as "powered by timer"
         rpiPoweredBy = SBC_POWERED_BY_TIMER;
         statusLedHandler.setRaspberryPiStatus(StatusLedHandler::RPI_STATUS_BOOTING);
         rpiPowered = true;
-        // TODO: also put a pin HIGH to signal activation by timer
         }
     else
         Serial.println("[I] SBC power already active, skipping");
@@ -420,11 +403,6 @@ void setup()
     serialHandler.setPacketDelimiterChars('{', '}');
     serialHandler.setTokenCharSeparators("|,");
     serialHandler.setMessageHandler(serialReceiveMessageHandler);
-    // serialHandler.begin(SERIAL_BAUDRATE);
-    // serialHandler.setRxTokenCharSeparators("|,");
-    // serialHandler.setMessageHandler(serialReceiveMessageHandler);
-    // delay(250);
-    // serialHandler.logInfo("Ultimoistante's DataVault Power Manager");
     //
     SPIFFS.begin();
     //
@@ -435,7 +413,7 @@ void setup()
     // starts millisecond timer
     os_timer_setfn(&msecTimer, msecTimerCallback, NULL);
     os_timer_arm(&msecTimer, 1, true);
-
+    //
     // Configure the ButtonConfig with the event handler.
     ButtonConfig* buttonConfig = ButtonConfig::getSystemButtonConfig();
     buttonConfig->setEventHandler(handleButtonEvent);
@@ -447,7 +425,6 @@ void setup()
     //
     delay(500);
     wifiHandler.setOnConnectCallback(onConnectCallback);
-    // wifiHandler.begin(&statusLedHandler, &serialHandler);
     wifiHandler.begin(&statusLedHandler);
     delay(1000);
     }
@@ -461,13 +438,6 @@ void loop()
     unsigned long now = millis();
     //
     serialHandler.doReceive();
-    /*while (swSerial.available())
-        {
-        char inByte = swSerial.read();
-        // DEBUG
-        Serial.printf("r: %c\n", inByte);
-        }*/
-        //
     //
     // checks if it's time to start webserver
     if (webServerActivationTime && now >= webServerActivationTime)
@@ -499,7 +469,7 @@ void loop()
             }
         }
     //
-    // checks if raspberryPi has requested power off and it's time to switch power
+    // checks if raspberryPi has requested power off and it's time to switch down power relay
     if (powerOffTime != 0 && now >= powerOffTime)
         {
         powerOffTime = 0;
